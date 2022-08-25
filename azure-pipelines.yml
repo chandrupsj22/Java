@@ -3,17 +3,20 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
-trigger:
-- main
-
-pool:
-  vmImage: ubuntu-latest
-
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+pipelines:
+  default:
+    - step:
+        name: Build and test
+        script:
+          - npm install
+          - npm test
+        after-script:
+          - if [[ BITBUCKET_EXIT_CODE -eq 0 ]]; then exit 0; else echo "Step failed"
+          -  pipe: atlassian/email-notify:0.3.8 
+             variables: 
+               USERNAME: 'myemail@example.com' 
+               PASSWORD: $PASSWORD 
+               FROM: 'myemail@example.com' 
+               TO: 'example@example.com' 
+               HOST: 'smtp.gmail.com'
+               BODY_PLAIN: "Build failed!"
